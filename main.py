@@ -34,15 +34,21 @@ async def login_for_access_token(
 
 
 @app.get("/games")
-async def get_games(
+async def list_all_games(
     token: Annotated[str, Depends(oauth2_scheme)], limit: int = 20
 ) -> list[Game]:
     return game_database[:limit]
 
 
 @app.get("/games/{name}")
-async def read_game(token: Annotated[str, Depends(oauth2_scheme)], name: str) -> Game:
-    return [game for game in game_database if game.name == name][0]
+async def find_game_by_name(
+    token: Annotated[str, Depends(oauth2_scheme)], name: str, list_all: bool = False
+) -> Game | list[Game]:
+    found_games = [game for game in game_database if game.name == name]
+    if list_all:
+        return found_games
+    else:
+        return found_games[0]
 
 
 @app.put("/games/")
